@@ -3,6 +3,7 @@ package com.example.know.your.interest.controller;
 import com.example.know.your.interest.model.User;
 import com.example.know.your.interest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,12 +13,27 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id){
-        return userService.getUserById(id);
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
+        try {
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.saveUser(user);
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        try {
+            User savedUser = userService.saveUser(user);
+            return ResponseEntity.status(201).body(savedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 }
